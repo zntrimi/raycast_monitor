@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { ExecError } from "../Interfaces";
 
+
 const execp = promisify(exec);
 
 const isValidTime = (value: string): boolean => {
@@ -74,6 +75,24 @@ const getBatteryTime = async (): Promise<string> => {
   }
 };
 
+async function getChargingWattage(): Promise<string> {
+  const cmd = "/usr/sbin/system_profiler SPPowerDataType | grep 'Wattage (W)' | awk '{print $NF}'";
+  console.log('Running command:', cmd);
+  return new Promise((resolve, reject) => {
+    exec(cmd, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        reject(error);
+      }
+      console.log(`stdout: ${stdout}`);
+      console.error(`stderr: ${stderr}`);
+      resolve(stdout.trim() || 'Not Available');
+    });
+  });
+}
+
+
+
 export {
   getIsCharging,
   getCycleCount,
@@ -82,4 +101,5 @@ export {
   getMaxBatteryCapacity,
   isValidTime,
   getBatteryTime,
+  getChargingWattage,
 };

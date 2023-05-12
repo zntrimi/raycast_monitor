@@ -28,12 +28,14 @@ export interface MemoryMonitorState {
 }
 
 export interface PowerMonitorState {
+  getChargingWattage: string | undefined;
   batteryLevel: string;
   isCharging: boolean;
   cycleCount: string;
   batteryCondition: string;
   maxBatteryCapacity: string;
   batteryTime: string;
+  chargingWattage: string;
 }
 
 export interface MemoryInterface {

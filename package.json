@@ -4,17 +4,19 @@
   "title": "System Monitor",
   "description": "Show information and usage related to CPU , Memory , Power and Network",
   "icon": "command-icon.png",
-  "author": "hossammourad",
+  "author": "Zentaroimai",
+  "owner": "yomy",
+  "contributors": [
+    "Crayon144",
+    "pernielsentikaer",
+    "lucasmezencio",
+    "zntrimi"
+  ],
   "categories": [
     "Productivity",
     "System"
   ],
   "license": "MIT",
-  "contributors": [
-    "Crayon144",
-    "pernielsentikaer",
-    "lucasmezencio"
-  ],
   "commands": [
     {
       "name": "system-monitor",
