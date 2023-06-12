@@ -21,83 +21,86 @@ const PowerMonitor = () => {
     isCharging: false,
     cycleCount: "Loading...",
     batteryCondition: "Loading...",
-    chargingWattage: "Loading...",
     maxBatteryCapacity: "Loading...",
     batteryTime: "Calculating...",
+    chargingWattage: "Loading...", // added chargingWattage to state
   });
 
-  const updateState = async () => {
-    setIsLoading(true);
-    try {
-      const newState = await powerMonitor.getState();
-      setState(newState);
-    } catch (error) {
-      setError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    updateState();
-    const interval = setInterval(updateState, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   useInterval(async () => {
-    try {
-      const newBatteryLevel = await getBatteryLevel();
-      const newIsCharging = await getIsCharging();
-      const newBatteryTime = await getBatteryTime();
-      const newChargingWattage = await getChargingWattage();
-
-      setState((prevState) => {
-        return {
-          ...prevState,
-          batteryLevel: newBatteryLevel,
-          isCharging: newIsCharging,
-          batteryTime: newBatteryTime,
-          chargingWattage: newChargingWattage,
-        };
+    getBatteryLevel()
+      .then((newBatteryLevel) => {
+        getIsCharging()
+          .then((newIsCharging) => {
+            getBatteryTime()
+              .then((newBatteryTime) => {
+                getChargingWattage() // added getChargingWattage call
+                  .then((newChargingWattage) => {
+                    setState((prevState) => {
+                      return {
+                        ...prevState,
+                        batteryLevel: newBatteryLevel,
+                        isCharging: newIsCharging,
+                        batteryTime: newBatteryTime,
+                        chargingWattage: newChargingWattage, // added chargingWattage to setState
+                      };
+                    });
+                    setIsLoading(false);
+                  })
+                  .catch((error: ExecError) => {
+                    setError(error);
+                  });
+              })
+              .catch((error: ExecError) => {
+                setError(error);
+              });
+          })
+          .catch((error: ExecError) => {
+            setError(error);
+          });
+      })
+      .catch((error: ExecError) => {
+        setError(error);
       });
-      setIsLoading(false);
-    } catch (error: any) {
-      setError(error);
-    }
   }, 1000);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const newCycleCount = await getCycleCount();
-        const newBatteryCondition = await getBatteryCondition();
-        const newMaxBatteryCapacity = await getMaxBatteryCapacity();
-        const newChargingWattage = await getChargingWattage();
-
-        setState((prevState) => {
-          return {
-            ...prevState,
-            cycleCount: newCycleCount,
-            batteryCondition: newBatteryCondition,
-            maxBatteryCapacity: newMaxBatteryCapacity,
-            chargingWattage: newChargingWattage,
-          };
-        });
-      } catch (error: any) {
+    getCycleCount()
+      .then((newCycleCount) => {
+        getBatteryCondition()
+          .then((newBatteryCondition) => {
+            getMaxBatteryCapacity()
+              .then((newMaxBatteryCapacity) => {
+                setState((prevState) => {
+                  return {
+                    ...prevState,
+                    cycleCount: newCycleCount,
+                    batteryCondition: newBatteryCondition,
+                    maxBatteryCapacity: newMaxBatteryCapacity,
+                  };
+                });
+              })
+              .catch((error: ExecError) => {
+                setError(error);
+              });
+          })
+          .catch((error: ExecError) => {
+            setError(error);
+          });
+      })
+      .catch((error: ExecError) => {
         setError(error);
-      }
-    })();
+      });
   }, []);
 
-  // useEffect(() => {
-  //   if (error) {
-  //     showToast({
-  //       style: Toast.Style.Failure,
-  //       title: "Couldn't fetch Power Info [Error Code: " + error.code + "]",
-  //       message: error.stderr,
-  //     });
-  //   }
-  // }, [error]);
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't fetch Power Info [Error Code: " + error.code + "]",
+        message: error.stderr,
+      });
+    }
+  }, [error]);
 
   return (
     <List.Item
@@ -112,17 +115,17 @@ const PowerMonitor = () => {
               <List.Item.Detail.Metadata.Label title="Charging" text={state.isCharging ? "Yes" : "No"} />
               <List.Item.Detail.Metadata.Label title="Cycle Count" text={state.cycleCount} />
               <List.Item.Detail.Metadata.Label title="Condition" text={state.batteryCondition} />
-              <List.Item.Detail.Metadata.Label title="Wattage" text={state.chargingWattage} />
+              <List.Item.Detail.Metadata.Label title="Wattage" text={state.chargingWattage + "W"} /> {/* Added wattage */}
               <List.Item.Detail.Metadata.Label title="Maximum Battery Capacity" text={state.maxBatteryCapacity} />
               <List.Item.Detail.Metadata.Label
-title={state.isCharging ? "Time to charge" : "Time to discharge"}
-text={isValidTime(state.batteryTime) ? state.batteryTime : "Calculating..."}
-/>
-</List.Item.Detail.Metadata>
-}
-/>
-}
-/>
-);
+                title={state.isCharging ? "Time to charge" : "Time to discharge"}
+                text={isValidTime(state.batteryTime) ? state.batteryTime : "Calculating..."}
+              />
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
+    />
+  );
 };
 export default PowerMonitor;
